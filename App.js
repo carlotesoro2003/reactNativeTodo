@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, RefreshControl } from 'react-native';
 import Tasks from './Tasks';
 
 import React, { useState } from 'react';
@@ -10,13 +10,23 @@ export default function App() {
   const [allTasks, setAllTasks] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
 
   const addTask = () => {
     if (task.trim() === '') {
-      return;
+      return(
+        alert('inputted task is empty. wtf bro')
+      );
     }
-    
+
     if (isEditing) {
       let editedTask = [...allTasks]; //get a copy of all tasks
       editedTask[editIndex] = task; //edit a task by getting the index and the current task 
@@ -26,8 +36,10 @@ export default function App() {
       setTask('');
     }
     else {
-      setAllTasks([...allTasks, task]); //append task to allTask array
-      setTask(''); //setTask to empty string 
+      let consoleTasks = ([...allTasks, task]);
+      setAllTasks(consoleTasks); 
+      setTask(''); 
+      console.log("tasks created: ", consoleTasks);
     }
   }
 
@@ -62,7 +74,9 @@ export default function App() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.scrollContainer}>
+        <ScrollView style={styles.scrollContainer} refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh}></RefreshControl>
+        }>
           <View style={styles.tasksContainer}>
             {
               allTasks.map((item, index) => (
@@ -72,7 +86,6 @@ export default function App() {
           </View>
         </ScrollView>
 
-        <StatusBar style="auto" />
       </View>
     </>
   );
